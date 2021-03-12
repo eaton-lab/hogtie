@@ -1,10 +1,16 @@
 #! usr/bin/env python
 
+"""
+Implementation of Pagel's method for ancestral state reconstruction
+"""
+
+
 import numpy as np
 import pandas as pd
 import toytree
 from scipy.optimize import minimize
 from scipy.linalg import expm
+
 
 def assign_tip_like_values(tree, data):
     """
@@ -15,10 +21,11 @@ def assign_tip_like_values(tree, data):
     valuesdict = dict(zip(keys,values))
     tree = tree.set_node_values(feature = "likelihood", values = valuesdict)
 
+
 def cond_like(likeleft0, likeleft1, likeright0, likeright1, tL, tR, alpha, beta):
-	"""
-	Calculates conditional likelihood of character states at each node
-	"""
+    """
+    Calculates conditional likelihood of character states at each node
+    """
     Q = np.array([[-alpha, alpha], [beta, -beta]])
     probleft = expm(Q*tL)
     probright = expm(Q*tR)
@@ -35,12 +42,17 @@ def cond_like(likeleft0, likeleft1, likeright0, likeright1, tL, tR, alpha, beta)
  
     return {0: like_zero, 1: like_one}
 
+
 def pruningalg(tree, alpha, beta):
-	"""
-	Runs Felsenstein's pruning algorithm on an input tree, given instantaneous transition
-	rates alpha and beta. Assigns likelihood scores for characters states at each node.
-	Specifically for binary state model. 
-	"""
+    """
+    Runs Felsenstein's pruning algorithm on an input tree, given instantaneous transition
+    rates alpha and beta. Assigns likelihood scores for characters states at each node.
+    Specifically for binary state model. 
+
+    Perhaps worth mentioning here that this function affects the tree
+    object "in-place" (as opposed to returning a modified copy of it) 
+    and therefore does not return anything.
+    """
     for node in tree.treenode.traverse("postorder"):
         if len(node.children) == 2:
             child1 = node.children[0]
@@ -55,6 +67,8 @@ def pruningalg(tree, alpha, beta):
                                  beta = beta)
             node.likelihood = likedict
 
+
+
 def node_like(tree):
     """
     Get negetive likelihood value at each node
@@ -64,6 +78,7 @@ def node_like(tree):
         like = node.likelihood[0]*0.5 + node.likelihood[1]*0.5
         node.neglike = -like
     return tree
+
 
 def model_fit(tree): #still fixing bugs
     """
@@ -87,3 +102,9 @@ def model_fit(tree): #still fixing bugs
         node.alpha = result['alpha']
         node.beta = result['beta']
     return tree
+
+
+
+if __name__ == "__main__":
+
+    # write a test for your functions here...
