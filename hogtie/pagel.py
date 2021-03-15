@@ -1,5 +1,10 @@
 #! usr/bin/env python
 
+"""
+Implementation of Pagel's method for ancestral state reconstruction
+"""
+
+
 import numpy as np
 import toytree
 from scipy.optimize import minimize
@@ -16,6 +21,7 @@ def assign_tip_like_values(tree, data):
     valuesdict = dict(zip(keys,values))
     tree = tree.set_node_values(feature = "likelihood", values = valuesdict)
     return tree
+
 
 def cond_like(likeleft0, likeleft1, likeright0, likeright1, tL, tR, alpha, beta):
     """
@@ -93,11 +99,12 @@ def fit_model_at_nodes(tree):
             node.alpha = model['alpha']
             node.beta = model['beta']
     return tree
+  
 def pruning_alg(tree):
     """
-    Runs Felsenstein's pruning algorithm using a binary state model on an input tree, 
-    given instantaneous transition rates alpha and beta. Assigns likelihood scores 
-    for characters states at each node.
+    Runs Felsenstein's pruning algorithm on an input tree, given instantaneous transition
+    rates alpha and beta. Assigns likelihood scores for characters states at each node.
+    Specifically for binary state model. Modified the tree object itself, returning a modified copy.
     """
     tree = fit_model_at_nodes(tree)
     for node in tree.treenode.traverse("postorder"):
@@ -121,5 +128,9 @@ if __name__ == "__main__":
     tree1 = toytree.rtree.unittree(ntips=10)
     data1 = [0,1,1,0,1,1,0,0,0,1]
     tree1 = assign_tip_like_values(tree1, data1)
+<<<<<<< HEAD
     print(tree1.get_node_values('likelihood',True,True))
     fit_model_at_nodes(tree1)
+=======
+    tree1 = pruning_alg(tree1)
+>>>>>>> d88a6752fcd5f1ace19071b2304768330d1cead8
