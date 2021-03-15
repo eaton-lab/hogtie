@@ -128,9 +128,6 @@ if __name__ == "__main__":
     tree1 = toytree.rtree.unittree(ntips=10)
     data1 = [0,1,1,0,1,1,0,0,0,1]
     tree1 = assign_tip_like_values(tree1, data1)
-<<<<<<< HEAD
     print(tree1.get_node_values('likelihood',True,True))
     fit_model_at_nodes(tree1)
-=======
     tree1 = pruning_alg(tree1)
->>>>>>> d88a6752fcd5f1ace19071b2304768330d1cead8
