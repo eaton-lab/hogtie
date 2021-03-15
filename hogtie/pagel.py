@@ -1,9 +1,15 @@
 #! usr/bin/env python
 
+"""
+Implementation of Pagel's method for ancestral state reconstruction
+"""
+
+
 import numpy as np
 import toytree
 from scipy.optimize import minimize
 from scipy.linalg import expm
+
 
 def assign_tip_like_values(tree, data):
     """
@@ -14,6 +20,7 @@ def assign_tip_like_values(tree, data):
     valuesdict = dict(zip(keys,values))
     tree = tree.set_node_values(feature = "likelihood", values = valuesdict)
     return tree
+
 
 def cond_like(likeleft0, likeleft1, likeright0, likeright1, tL, tR, alpha, beta):
     """
@@ -91,11 +98,12 @@ def fit_model_at_nodes(tree):
             node.alpha = model['alpha']
             node.beta = model['beta']
     return tree
+  
 def pruning_alg(tree):
     """
     Runs Felsenstein's pruning algorithm on an input tree, given instantaneous transition
     rates alpha and beta. Assigns likelihood scores for characters states at each node.
-    Specifically for binary state model. 
+    Specifically for binary state model. Modified the tree object itself, returning a modified copy.
     """
     tree = fit_model_at_nodes(tree)
     for node in tree.treenode.traverse("postorder"):
@@ -113,6 +121,32 @@ def pruning_alg(tree):
                                  )
             node.likelihood = likedict
             return tree
+
+
+def model_fit(tree): #still fixing bugs
+    """
+    Find the maximum likelihood estimate of the two
+    rate model parameters at each node given the data.
+    """
+    tree.set_node_values('alpha')
+    tree.set_node_values('beta')
+    for node in tree.treenode.traverse('postorder'):
+        estimate = minimize(
+            fun=node_like,
+            x0=np.array([1., 1.]),
+            method='L-BFGS-B',
+            bounds=((0, 10), (0, 10))
+            )
+        result = {
+            'alpha': round(estimate.x[0], 3),
+            'beta': round(estimate.x[1], 3), 
+            'convergence': estimate.success,
+            }
+        node.alpha = result['alpha']
+        node.beta = result['beta']
+    return tree
+
+
 
 
 if __name__ == "__main__":
