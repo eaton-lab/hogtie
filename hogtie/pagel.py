@@ -5,6 +5,8 @@ import toytree
 from scipy.optimize import minimize
 from scipy.linalg import expm
 
+#convert to class object
+
 def assign_tip_like_values(tree, data):
     """
     Assigns likelihood values to tree tips
@@ -37,16 +39,16 @@ def cond_like(likeleft0, likeleft1, likeright0, likeright1, tL, tR, alpha, beta)
 
 
 def node_like(x0, likeleft0, likeleft1, likeright0, likeright1, tL, tR, anca):
-  
+
     condlik = cond_like(likeleft0, likeleft1, likeright0, likeright1, tL, tR, x0[0], x0[1])
-  
+
     # get full likelihood
     lik = (1 - anca) * condlik[0] + (anca) * condlik[1]
-  
+
     # I don't understand this part
     if anca in [0., 1.]:
         lik /= 2
- 
+
     return -lik #np.log(lik)
 
 def model_fit(likeleft0, likeleft1, likeright0, likeright1, tL, tR, anca):
@@ -55,16 +57,16 @@ def model_fit(likeleft0, likeleft1, likeright0, likeright1, tL, tR, anca):
     rate model parameters at each node given the data.
     """
     args = (likeleft0, likeleft1, likeright0, likeright1, tL, tR, anca)
-   
+
     # ML estimate
     estimate = minimize(
-       fun=node_like, 
+        fun=node_like, 
         x0=np.array([1., 1.]),
         args=args,
         method='L-BFGS-B',
         bounds=((0, 10), (0, 10))
     )
-   
+
     score = -1 * node_like(estimate.x, *args)
     result = {
         "alpha": round(estimate.x[0], 3),
@@ -93,9 +95,9 @@ def fit_model_at_nodes(tree):
     return tree
 def pruning_alg(tree):
     """
-    Runs Felsenstein's pruning algorithm on an input tree, given instantaneous transition
-    rates alpha and beta. Assigns likelihood scores for characters states at each node.
-    Specifically for binary state model. 
+    Runs Felsenstein's pruning algorithm using a binary state model on an input tree, 
+    given instantaneous transition rates alpha and beta. Assigns likelihood scores 
+    for characters states at each node.
     """
     tree = fit_model_at_nodes(tree)
     for node in tree.treenode.traverse("postorder"):
@@ -119,4 +121,5 @@ if __name__ == "__main__":
     tree1 = toytree.rtree.unittree(ntips=10)
     data1 = [0,1,1,0,1,1,0,0,0,1]
     tree1 = assign_tip_like_values(tree1, data1)
-    tree1 = pruning_alg(tree1)
+    print(tree1.get_node_values('likelihood',True,True))
+    fit_model_at_nodes(tree1)
