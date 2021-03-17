@@ -33,8 +33,8 @@ def genome_vis(data):
 if __name__ == "__main__":
 
     # Create test dataset
-    data = np.random.uniform(low=0.0, high=1.0, size=1000)
-    df = pd.DataFrame(data)
+    data1 = np.random.uniform(low=0.0, high=1.0, size=1000)
+    df = pd.DataFrame(data1)
     df['rollingmean']=df.rolling(50,win_type='triang').mean()
 
     # Compute rolling mean as 'z_score'
