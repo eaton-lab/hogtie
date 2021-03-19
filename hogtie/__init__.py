@@ -6,5 +6,5 @@ init stuff
 
 __version__ = "0.0.1"
 
-from .hogtie import hogtie
-from .utils import *
+from hogtie.pagel import Pagel
+#from .utils import *

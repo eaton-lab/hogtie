@@ -145,7 +145,7 @@ class Pagel:
                                      beta = float(node.beta))
                 node.likelihood = likedict
         return self.tree
-    
+   
     def run(self):
         """
         Assigns likelihood values to tips and runs Felstein's pruning algorithm for 
@@ -163,5 +163,4 @@ if __name__ == "__main__":
     data1 = [0,1,1,0,1,1,0,0,0,1]
     testobject = Pagel(tree=tree1, data=data1)
     testobject.run()
-    print(testobject.tree.get_node_values('likelihood',True,True))
-    #print(testobject.tree.get_node_values('likelihood',True,True))
+    print(testobject.tree.get_node_values('likelihood',True,True)) #works!
