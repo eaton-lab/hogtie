@@ -4,12 +4,35 @@
 Implementation of Pagel's method for ancestral state reconstruction
 """
 
+#need a total likelihood score, assume value of 0 at root?
+
 import numpy as np
 import toytree
 from scipy.optimize import minimize
 from scipy.linalg import expm
 
 class Pagel:
+    """
+    Pagel class object, implements Pagel's (1994) method for ancestral character
+    state reconstruction.
+
+    Parameters:
+    -----------
+    tree: ToyTree
+        A toytree object of the phylogeny of interest
+
+    data: list
+        List of data representing binary character states (0's and 1's) along the
+        tips of the tree. The length of the list must be equal to the number of 
+        tips on the tree
+
+    Returns:
+    -----------
+    Right now: A ToyTree object with estimated likelihood scores at each node
+    NOTE: I want it to return likelihood of the whole tree given the data
+    """
+
+
     def __init__(self, tree, data):
         self.tree = tree
         self.data = data
@@ -145,7 +168,7 @@ class Pagel:
                                      beta = float(node.beta))
                 node.likelihood = likedict
         return self.tree
-   
+  
     def run(self):
         """
         Assigns likelihood values to tips and runs Felstein's pruning algorithm for 
