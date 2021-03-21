@@ -8,8 +8,15 @@ HoGTIE is under active development. If you would like to check out or contribute
 # coming soon...
 # conda install hogtie -c conda-forge -c bioconda
 
-# for now, do dev installation with pip
+# for now, install dependencies (toytree, numpy, pandas, scipy) and
+# do dev installation with pip
+
 git clone https://github.com/cohen-r/hogtie
 cd hogtie
 pip install -e .
+
+#to test your installation, run:
+hogtie --data sampledata/testdata.csv --tree sampledata/testtree.txt
+
 ```
+
