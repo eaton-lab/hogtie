@@ -51,7 +51,7 @@ def main():
     print('Getting conditional likelihoods...')
     liketree = Pagel(tree=mytree, data=mydata)
     liketree.run()
-    print('The conditional likelihoods are:')
+    print('The conditional likelihoods at each node are:')
     print(liketree.tree.get_node_values('likelihood',True,True))
 
 
