@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
 """
-init stuff
+Binary state character phylogenetic likelihood calculations
 """
 
-__version__ = "0.0.1"
 
+from hogtie.utils import set_loglevel
+from hogtie.binary_state_model import BinaryStateModel
 from hogtie.pagel import Pagel
-#from .utils import *
+
+__version__ = "0.0.3"
+
+set_loglevel("INFO")
