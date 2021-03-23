@@ -1,7 +1,7 @@
 #! usr/bin/env python
 
 """
-generating data using ipcoal
+test data module
 """
 
 import ipcoal
