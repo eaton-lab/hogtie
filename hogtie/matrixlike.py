@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd #assuming matrix will be a pandas df
 from hogtie import binary_state_model
 
+DATA = my_input_file
+
 class MatrixParser:
     """
     Runs BinaryStateModel on matrix columns, returns a likelihood score for each column, flags
@@ -20,11 +22,11 @@ class MatrixParser:
         self.tree = tree
         self.matrix = matrix
 
-    def column_to_list(self):
+    def csv_to_df:
         """
-        takes column in matrix and returns a numpy array
         """
-        pass
+        data = pd.read_csv(DATA)
+
 
     def pagel_run(self):
         """
