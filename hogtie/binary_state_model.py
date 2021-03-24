@@ -135,7 +135,7 @@ class BinaryStateModel:
 
     def pruning_algorithm(self):
         """
-        Traverse tree from tips to root calculating condictional 
+        Traverse tree from tips to root calculating conditional 
         likelihood at each internal node on the way, and compute final
         conditional likelihood at root based on priors for root state.
         """
@@ -229,7 +229,7 @@ def optim_func(params, model):
 
 if __name__ == "__main__":
 
-    from utils import set_loglevel
+    from hogtie.utils import set_loglevel
     set_loglevel("INFO")
     TREE = toytree.rtree.imbtree(ntips=10, treeheight=1000)
 
@@ -249,4 +249,6 @@ if __name__ == "__main__":
     data1 = [0,1,1,0,1,1,0,0,0,1]
     testobject = BinaryStateModel(tree=tree1, data=data1)
     testobject.optimize()
+
+    print(testobject.log_lik)
     # print(testobject.tree.get_node_values('likelihood',True,True)) #works!

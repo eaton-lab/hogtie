@@ -9,11 +9,11 @@ Runs Pagel on matrix derived from kmerkit
 
 import numpy as np
 import pandas as pd #assuming matrix will be a pandas df
-from hogtie import Pagel
+from hogtie import binary_state_model
 
 class MatrixParser:
     """
-    Runs Pagel on matrix columns, returns a likelihood score for each column, flags
+    Runs BinaryStateModel on matrix columns, returns a likelihood score for each column, flags
     likelihood scores that do not meet a certain threshold
     """
     def __init__(self, tree, matrix):
@@ -22,21 +22,20 @@ class MatrixParser:
 
     def column_to_list(self):
         """
-        takes column in matrix and returns a list
+        takes column in matrix and returns a numpy array
         """
         pass
 
     def pagel_run(self):
         """
-        runs Pagel on the list
+        runs Pagel on the array
         """
         pass
 
     def total_matrix_run(self):
         """
-        uses for loop to run the two previous functions on the whole matrix. Stores
-        a dict of likelihoods, key corresponds to column idx from matrix and value
-        is the likelihood
+        iterates over df to get likelihoods, (object.log_lik, where object is an instance
+        of BinaryStateModel
         """
         pass
 
