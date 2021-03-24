@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd #assuming matrix will be a pandas df
 from hogtie import binary_state_model
 
-DATA = my_input_file
+DATA = pd.read_csv(my_input_file)
 
 class MatrixParser:
     """
@@ -21,12 +21,6 @@ class MatrixParser:
     def __init__(self, tree, matrix):
         self.tree = tree
         self.matrix = matrix
-
-    def csv_to_df:
-        """
-        """
-        data = pd.read_csv(DATA)
-
 
     def pagel_run(self):
         """
