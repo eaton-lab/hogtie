@@ -10,7 +10,7 @@ Runs Pagel on matrix derived from kmerkit
 import numpy as np
 import pandas as pd #assuming matrix will be a pandas df
 from loguru import logger
-from hogtie import binary_state_model
+from hogtie.binary_state_model import BinaryStateModel
 
 
 #DATA = pd.read_csv(my_input_file)
@@ -22,55 +22,27 @@ class MatrixParser:
     """
     def __init__(self, 
         tree,               #must be Toytree class object
-        matrix = None,      #must be pandas DataFrame class object
-        file = None):       #must be .csv filetype - as filepath
-        
+        file):       #must be .csv filetype - as filepath
 
-        self.tree = tree    
+        self.tree = tree
+        self.matrix = pd.read_csv(file)
 
-        if isinstance(matrix, pd.DataFrame):
-            self.matrix = matrix  
+        #check that data only contains 1's and 0's
+        # ...
 
-        elif file != None:
-            self.matrix = pd.read_csv(file)
-
-        else:
-            raise ValueError("please supply matrix")
-
-    def column_to_list(self):
+    def matrix_likelihoods(self):
         """
-        takes column in matrix and returns a list
+        Gets likelihoods for each column of the matrix
         """
-        datalists = []
-        for i in range(0, len(self.matrix.columns)):
-            data = []
-            for index, row in self.matrix.iterrows():
-                data.append(row[i])
-            datalists.append(data)
-        self.datalists=datalists
-
-    def pagel_run(self):
-        """
-        runs Pagel on the list
-        """
-        ## - the way I wrote the code, this function is unnecessary ~ elissa
-        pass
-
-    def total_matrix_run(self):
-        """
-        uses for loop to run the two previous functions on the whole matrix. Stores
-        a dict of likelihoods, key corresponds to column idx from matrix and value
-        is the likelihood
-        """
-
         likelihoods = []
-        for item in self.datalists:
-            data = item
-            out = binary_state_model.BinaryStateModel(tree, data)
+        for column in matrix:
+            data = matrix[column]
+            out = BinaryStateModel(tree, data)
             out.optimize()
             
             likelihoods.append(out.log_lik)
-        
+            
+        return likelihoods
         logger.info(f"Likelihoods: {likelihoods}")
 
     def threshold(self):
