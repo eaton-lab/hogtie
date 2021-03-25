@@ -49,8 +49,15 @@ class BinaryStateModel:
         self.beta = 1 / tree.treenode.height
         self.log_lik = 0.
 
-        # check that data is appropriate shape given the tree
-        # ...
+        if len(data) != tree.ntips:
+            raise Exception('Matrix row number must equal ntips on tree')
+
+        for i in self.data:
+            if i == 1 or 0:
+                pass
+            else:
+                raise ValueError('Only valid trait values are 0 and 1')
+
 
         # set likelihoods to 1 for data at tips, and None for internal
         self.set_initial_likelihoods()
@@ -67,8 +74,7 @@ class BinaryStateModel:
             [self.beta,  -self.beta],
         ])
         return qmat
-
-    
+ 
 
     def set_initial_likelihoods(self):
         """
@@ -214,15 +220,15 @@ class BinaryStateModel:
         return drawing
 
 
-def optim_func(params, model):
-    """
-    Function to optimize. Takes an iterable as the first argument 
-    containing the parameters to be estimated (alpha, beta), and the
-    BinaryStateModel class instance as the second argument.
-    """
-    model.alpha, model.beta = params
-    lik = model.pruning_algorithm()
-    return -lik
+    def optim_func(params, model):
+        """
+        Function to optimize. Takes an iterable as the first argument 
+        containing the parameters to be estimated (alpha, beta), and the
+        BinaryStateModel class instance as the second argument.
+        """
+        model.alpha, model.beta = params
+        lik = model.pruning_algorithm()
+        return -lik
 
 
 

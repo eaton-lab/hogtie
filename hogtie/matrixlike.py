@@ -34,16 +34,16 @@ class MatrixParser:
         """
         Gets likelihoods for each column of the matrix
         """
-        likelihoods = []
-        for column in matrix:
-            data = matrix[column]
+        likelihoods = np.empty((0,len(self.matrix.columns)),float)
+        for column in self.matrix:
+            data = self.matrix[column]
             out = BinaryStateModel(tree, data)
             out.optimize()
-            
-            likelihoods.append(out.log_lik)
-            
-        return likelihoods
-        logger.info(f"Likelihoods: {likelihoods}")
+         
+            lik = out.log_lik
+            likelihoods = np.append(likelihoods, lik)
+          
+            self.likelihoods = likelihoods
 
     def threshold(self):
         """
@@ -58,6 +58,6 @@ if __name__ == "__main__":
     tree = toytree.rtree.unittree(ntips=10)
     file = os.path.join(HOGTIEDIR, "sampledata", "testmatrix.csv")
     testmatrix = MatrixParser(tree=tree, file=file)
-    testmatrix.column_to_list()
-    testmatrix.total_matrix_run()
+    testmatrix.matrix_likelihoods()
+    print(testmatrix.likelihoods)
 
