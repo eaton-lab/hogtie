@@ -27,8 +27,9 @@ class MatrixParser:
         self.tree = tree
         self.matrix = pd.read_csv(file)
 
-        #check that data only contains 1's and 0's
-        # ...
+        #for i in self.matrix:
+        #  if i != 1 or 0:
+        #        raise ValueError('Only valid trait values are 0 and 1')
 
     def matrix_likelihoods(self):
         """
@@ -37,12 +38,12 @@ class MatrixParser:
         likelihoods = np.empty((0,len(self.matrix.columns)),float)
         for column in self.matrix:
             data = self.matrix[column]
-            out = BinaryStateModel(tree, data)
+            out = BinaryStateModel(self.tree, data)
             out.optimize()
-         
+        
             lik = out.log_lik
             likelihoods = np.append(likelihoods, lik)
-          
+         
             self.likelihoods = likelihoods
 
     def threshold(self):
@@ -55,9 +56,8 @@ if __name__ == "__main__":
     import toytree
     import os
     HOGTIEDIR = os.path.dirname(os.getcwd())
-    tree = toytree.rtree.unittree(ntips=10)
-    file = os.path.join(HOGTIEDIR, "sampledata", "testmatrix.csv")
-    testmatrix = MatrixParser(tree=tree, file=file)
+    tree1 = toytree.rtree.unittree(ntips=10)
+    file1 = os.path.join(HOGTIEDIR, "sampledata", "testmatrix.csv")
+    testmatrix = MatrixParser(tree=tree1, file=file1)
     testmatrix.matrix_likelihoods()
     print(testmatrix.likelihoods)
-

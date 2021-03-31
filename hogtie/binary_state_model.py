@@ -52,12 +52,6 @@ class BinaryStateModel:
         if len(data) != tree.ntips:
             raise Exception('Matrix row number must equal ntips on tree')
 
-        for i in self.data:
-            if i == 1 or 0:
-                pass
-            else:
-                raise ValueError('Only valid trait values are 0 and 1')
-
 
         # set likelihoods to 1 for data at tips, and None for internal
         self.set_initial_likelihoods()
@@ -192,7 +186,6 @@ class BinaryStateModel:
         # get scaled likelihood values
         self.log_lik = result["negLogLik"]
         self.tree = self.tree.set_node_values(
-            feature="likelihood",
             values={
                 node.idx: np.array(node.likelihood) / sum(node.likelihood)
                 for node in self.tree.idx_dict.values()
@@ -220,15 +213,15 @@ class BinaryStateModel:
         return drawing
 
 
-    def optim_func(params, model):
-        """
-        Function to optimize. Takes an iterable as the first argument 
-        containing the parameters to be estimated (alpha, beta), and the
-        BinaryStateModel class instance as the second argument.
-        """
-        model.alpha, model.beta = params
-        lik = model.pruning_algorithm()
-        return -lik
+def optim_func(params, model):
+    """
+    Function to optimize. Takes an iterable as the first argument 
+    containing the parameters to be estimated (alpha, beta), and the
+    BinaryStateModel class instance as the second argument.
+    """
+    model.alpha, model.beta = params
+    lik = model.pruning_algorithm()
+    return -lik
 
 
 
