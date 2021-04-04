@@ -35,8 +35,8 @@ class BinaryStateModel:
     prior: float
         Prior probability that the root state is 1 (default=0.5).
     """
-    def __init__(self, tree, data, model=None, prior=0.5):
-        
+    def __init__(self, tree, data, model, prior=0.5):
+      
         # store user inputs
         self.tree = tree
         self.data = data
@@ -63,12 +63,23 @@ class BinaryStateModel:
         Instantaneous transition rate matrix (Q). This returns the 
         matrix given the values currently set on .alpha and .beta.
         """
-        qmat = np.array([
-            [-self.alpha, self.alpha],
-            [self.beta,  -self.beta],
-        ])
+        if self.model == 'ARD':
+            qmat = np.array([
+                [-self.alpha, self.alpha],
+                [self.beta,  -self.beta],
+            ])
+
+        elif self.model == 'ER':
+            qmat = np.array([
+                [-self.alpha, self.alpha],
+                [self.alpha,  -self.alpha],
+            ])
+
+        else:
+            raise Exception('model must be specified as either ARD or ER')
+       
         return qmat
- 
+
 
     def set_initial_likelihoods(self):
         """
@@ -164,28 +175,52 @@ class BinaryStateModel:
         logger.warning(message).
         """  
         # ML estimate
-        estimate = minimize(
+
+        if self.model == 'ARD':
+            estimate = minimize(
             fun=optim_func,
             x0=np.array([self.alpha, self.beta]),
             args=(self,),
             method='L-BFGS-B',
             bounds=((0, 50), (0, 50)),
-        )
+            )
+    # logger.info(estimate)
+
+    # organize into a dict
+            result = {
+                "alpha": round(estimate.x[0], 6),
+                "beta": round(estimate.x[1], 6), 
+                "Lik": round(estimate.fun, 6),            
+                "negLogLik": round(-np.log(-estimate.fun), 2),
+                "convergence": estimate.success,
+                }
+            logger.info(result)
+
+        elif self.model == 'ER':
+            estimate = minimize(
+                fun=optim_func,
+                x0=np.array([self.alpha]),
+                args=(self,),
+                method='L-BFGS-B',
+                bounds=[(0, 50)],
+            )
         # logger.info(estimate)
 
-        # organize into a dict
-        result = {
-            "alpha": round(estimate.x[0], 6),
-            "beta": round(estimate.x[1], 6), 
-            "Lik": round(estimate.fun, 6),            
-            "negLogLik": round(-np.log(-estimate.fun), 2),
-            "convergence": estimate.success,
-        }
-        logger.info(result)
+            result = {
+                "rate": round(estimate.x, 6),
+                "Lik": round(estimate.fun, 6),            
+                "negLogLik": round(-np.log(-estimate.fun), 2),
+                "convergence": estimate.success,
+                }
+            logger.info(result)
+
+        else:
+            raise Exception('model must be specified as either ARD or ER')
 
         # get scaled likelihood values
         self.log_lik = result["negLogLik"]
         self.tree = self.tree.set_node_values(
+            'likelihood',
             values={
                 node.idx: np.array(node.likelihood) / sum(node.likelihood)
                 for node in self.tree.idx_dict.values()
@@ -219,11 +254,15 @@ def optim_func(params, model):
     containing the parameters to be estimated (alpha, beta), and the
     BinaryStateModel class instance as the second argument.
     """
-    model.alpha, model.beta = params
-    lik = model.pruning_algorithm()
+    if model.model == 'ARD':
+        model.alpha, model.beta = params
+        lik = model.pruning_algorithm()
+
+    else:
+       model.alpha = params
+       lik = model.pruning_algorithm()
+
     return -lik
-
-
 
 
 if __name__ == "__main__":
@@ -232,22 +271,17 @@ if __name__ == "__main__":
     set_loglevel("INFO")
     TREE = toytree.rtree.imbtree(ntips=10, treeheight=1000)
 
-    DATA = np.array([1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
-    mod = BinaryStateModel(TREE, DATA)
+    DATA = np.array([1, 1, 0, 0, 1, 0, 0, 0, 0, 1])
+    mod = BinaryStateModel(TREE, DATA, 'ER')
     mod.optimize()
 
-    DATA = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
-    mod = BinaryStateModel(TREE, DATA)
-    mod.optimize()
+    #DATA = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+    #mod = BinaryStateModel(TREE, DATA, 'ARD')
+    #mod.optimize()
 
-    DATA = np.array([1, 1, 1, 1, 1, 1, 0, 0, 0, 0])
-    mod = BinaryStateModel(TREE, DATA)
-    mod.optimize()
+    #DATA = np.array([1, 1, 1, 1, 1, 1, 0, 0, 0, 0])
+    #mod = BinaryStateModel(TREE, DATA, 'ER')
+    #mod.optimize()
 
-    tree1 = toytree.rtree.unittree(ntips=10, seed=123)
-    data1 = [0,1,1,0,1,1,0,0,0,1]
-    testobject = BinaryStateModel(tree=tree1, data=data1)
-    testobject.optimize()
 
-    print(testobject.log_lik)
     # print(testobject.tree.get_node_values('likelihood',True,True)) #works!
