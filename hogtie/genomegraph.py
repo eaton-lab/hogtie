@@ -1,33 +1,42 @@
 #! usr/bin/env python
 
+import toyplot
 import numpy as np
 import pandas as pd
 from scipy import stats
-import toyplot
+from hogtie import BinaryStateModel, MatrixParser
 
 
 #there should be a horizontal line at the expected value
 #outliers different colors?
 
-def genome_vis(data):
+class GenomeVisualization(MatrixParser):
     """"
     Takes data input of likelihood scores in a pandas dataframe and computes
     rolling window average of likelihoods then and plots them along
     linear genome. If the likelihood deviates more than expected in the positive direction,
     is flagged through coloring it red.
     """
-    data['rollingav']=data.rolling(50,win_type='triang').mean()
-    data['z_score']=stats.zscore(data['rollingav'],nan_policy='omit')
+    def __init__(self):
+        pass
 
-    plot = toyplot.plot(
-        data['rollingav'],
-        width = 500,
-        height=500,
-        color = np.random.random(series.shape),
-        palette = toyplot.color.brewer.map("Oranges"),
-        size = [16, 9]
-    )
-    return plot
+    def get_graph(self):
+        """
+        Graphs rolling average of likelihoods along the linear genome, identifies regions that deviate
+        significantly from null expectations
+        """
+        
+        self.likelihoods['rollingav']=self.likelihoods.rolling(50,win_type='triang').mean()
+        #data['z_score']=stats.zscore(data['rollingav'],nan_policy='omit')
+
+        plot = toyplot.plot(
+            self.likelihoods['rollingav'],
+            width = 500,
+            height=500,
+            color = 'blue'
+        )
+
+        return plot
 
 
 if __name__ == "__main__":

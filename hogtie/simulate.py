@@ -6,17 +6,18 @@ generating data using ipcoal
 
 import ipcoal
 import toytree
+from hogtie import BinaryStateModel, MatrixParser
 
-if __name__ == "__main__":
+def create_null(tree):
+    """
+    Simulates SNPs across the input tree to create the null expectation for likelihood scores. 
+    Deviation from the null will be flagged. 
+    """
+    #simulate snps across the input tree
+    mod = ipcoal.Model(tree=tree, Ne=1e6)
+    mod.sim_loci(1, nsites=10000)
+    null_genos = mod.write_vcf()
 
-    # sample a 10 tip imbalanced species tree
-    tree = toytree.rtree.imbtree(ntips=10, treeheight=1e5)
-
-    # set up a Model with an admixture edge between divergent tips close to the present
-    mod = ipcoal.Model(tree=tree, Ne=1e5, nsamples=1, admixture_edges=(3,5,0.5,0.01))
-
-    # simulate 1 long chromosome
-    mod.sim_snps(1000)
-
-    # write haploid genotypes to VCF file
-    genos = mod.write_vcf(outdir="../examples", name="recent_admixture")
+    #run the Binary State model on the matrix
+    MatrixParser(tree=tree, matrix=null_genos, model='ARD')
+    

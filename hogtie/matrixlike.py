@@ -57,9 +57,9 @@ class MatrixParser:
             lik = out.log_lik
             likelihoods = np.append(likelihoods, lik)
          
-            self.likelihoods = likelihoods
+            self.likelihoods = pd.DataFrame(likelihoods)
 
-    logger.debug(f'Calculated likelihoods for each column: {self.tree.get_node_values('likelihood',True,True)}')
+    #logger.debug(f'Calculated likelihoods for each column: {self.tree.get_node_values('likelihood',True,True)}')
 
     def threshold(self):
         """
