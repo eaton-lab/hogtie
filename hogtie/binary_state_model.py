@@ -56,6 +56,9 @@ class BinaryStateModel:
         # set likelihoods to 1 for data at tips, and None for internal
         self.set_initial_likelihoods()
 
+        #assign qmat
+        self.qmat()
+
 
     @property
     def qmat(self):
@@ -79,7 +82,9 @@ class BinaryStateModel:
             raise Exception('model must be specified as either ARD or ER')
        
         return qmat
+        #self.qmat = qmat
 
+        logger.info(f'the qmat is {qmat}')
 
     def set_initial_likelihoods(self):
         """
@@ -100,7 +105,7 @@ class BinaryStateModel:
             values=valuesdict,
             default=None,
         )
-        logger.debug(f"set tips values: {valuesdict}")
+        logger.info(f"set tips values: {valuesdict}")
 
 
 
@@ -184,9 +189,9 @@ class BinaryStateModel:
             method='L-BFGS-B',
             bounds=((0, 50), (0, 50)),
             )
-    # logger.info(estimate)
+        # logger.info(estimate)
 
-    # organize into a dict
+        # organize into a dict
             result = {
                 "alpha": round(estimate.x[0], 6),
                 "beta": round(estimate.x[1], 6), 
@@ -273,7 +278,7 @@ if __name__ == "__main__":
 
     DATA = np.array([1, 1, 0, 0, 1, 0, 0, 0, 0, 1])
     mod = BinaryStateModel(TREE, DATA, 'ER')
-    mod.optimize()
+    #mod.optimize()
 
     #DATA = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
     #mod = BinaryStateModel(TREE, DATA, 'ARD')
