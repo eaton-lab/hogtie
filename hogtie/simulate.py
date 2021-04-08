@@ -18,7 +18,7 @@ def create_null(tree):
     #note: snp sims take a lot of computational power
 
     mod = ipcoal.Model(tree=tree, Ne=1e6)
-    mod.sim_snps(1, nsites=10000)
+    mod.sim_snps(nsnps=10000)
     null_genos = mod.write_vcf()
 
     #run the Binary State model on the matrix and get likelihoods
