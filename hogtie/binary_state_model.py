@@ -184,32 +184,46 @@ class BinaryStateModel:
         logger.warning(message).
         """  
 
-        estimate = minimize(
+        if self.model == 'ARD':
+            estimate = minimize(
             fun=optim_func,
-            x0=np.array([self.alpha]),
+            x0=np.array([self.alpha, self.beta]),
             args=(self,),
             method='L-BFGS-B',
-            bounds=[(0, 50)],
-        )
+            bounds=((0, 50), (0, 50)),
+            )
+        # logger.info(estimate)
 
-        result = {
-            "alpha": estimate.x[0],
-            "Lik": estimate.fun,            
-            "negLogLik": -np.log(-estimate.fun),
-            "convergence": estimate.success,
-            }
+        # organize into a dict
+            result = {
+                "alpha": round(estimate.x[0], 6),
+                "beta": round(estimate.x[1], 6), 
+                "Lik": round(estimate.fun, 6),            
+                "negLogLik": round(-np.log(-estimate.fun), 2),
+                "convergence": estimate.success,
+                }
+            logger.info(result)
 
-        logger.info(result)
+        elif self.model == 'ER':
+            estimate = minimize(
+                fun=optim_func,
+                x0=np.array([self.alpha]),
+                args=(self,),
+                method='L-BFGS-B',
+                bounds=[(0, 50)],
+            )
+        # logger.info(estimate)
 
-        # get scaled likelihood values
-        self.log_lik = result["negLogLik"]
-        self.tree = self.tree.set_node_values(
-            'likelihood',
-            values={
-                node.idx: np.array(node.likelihood) / sum(node.likelihood)
-                for node in self.tree.idx_dict.values()
-            }
-        )
+            result = {
+                "rate": estimate.x,
+                "Lik": estimate.fun,            
+                "negLogLik": -np.log(-estimate.fun),
+                "convergence": estimate.success,
+                }
+            logger.info(result)
+
+        else:
+            raise Exception('model must be specified as either ARD or ER')
 
 
     def draw_states(self):
