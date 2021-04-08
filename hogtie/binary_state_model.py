@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-...
+Implements binary state markov model for ancestral character state reconstruction
 """
 
 import numpy as np
@@ -35,7 +35,7 @@ class BinaryStateModel:
     prior: float
         Prior probability that the root state is 1 (default=0.5). Flat, uniform prior is assumed.
     """
-    def __init__(self, tree, data, model=None, prior=0.5):
+    def __init__(self, tree, data, model, prior=0.5):
       
         # store user inputs
         self.tree = tree
@@ -46,28 +46,41 @@ class BinaryStateModel:
         # model parameters to be estimated (in ER model only alpha)
         # set to initial values based on the tree height units.
         self.alpha = 1 / tree.treenode.height
+        self.beta = 1 / tree.treenode.height
         self.log_lik = 0.
 
         if len(data) != tree.ntips:
             raise Exception('Matrix row number must equal ntips on tree')
 
-
         # set likelihoods to 1 for data at tips, and None for internal
         self.set_initial_likelihoods()
 
+        if self.model == 'ER':
+            self.qmat = np.array([
+                [-self.alpha, self.alpha],
+                [self.alpha,  -self.alpha],
+                ])
+        
+        elif self.model == 'ARD':
+            self.qmat = np.array([
+                [-self.alpha, self.beta],
+                [self.alpha, -self.beta]
+                ])
+        else:
+            raise Exception("model must be specified as either 'ER' or 'ARD'")
 
 
-    @property
-    def qmat(self):
+    #@property
+    # def qmat(self):
         """
         Instantaneous transition rate matrix (Q). This returns the 
         matrix given the values currently set on .alpha and .beta.
         """
         #if self.model == 'ER':
-        qmat = np.array([
-            [-self.alpha, self.alpha],
-            [self.alpha,  -self.alpha],
-            ])
+        #qmat = np.array([
+        #    [-self.alpha, self.alpha],
+        #    [self.alpha,  -self.alpha],
+        #    ])
 
         #elif self.model == 'ARD':
         #    qmat = np.array([
@@ -75,7 +88,7 @@ class BinaryStateModel:
         #        [-self.beta, self.alpha],    
         #       ])
 
-        return qmat
+        #return qmat
         #self.qmat = qmat
 
     def set_initial_likelihoods(self):
@@ -97,6 +110,7 @@ class BinaryStateModel:
             values=valuesdict,
             default=None,
         )
+
         logger.debug(f"set tips values: {valuesdict}")
 
 
@@ -139,7 +153,6 @@ class BinaryStateModel:
         logger.debug(f"node={nidx}; likelihood=[{anc_lik_0:.6f}, {anc_lik_1:.6f}]")
         node.likelihood = [anc_lik_0, anc_lik_1]
 
-
     def pruning_algorithm(self):
         """
         Traverse tree from tips to root calculating conditional 
@@ -173,16 +186,16 @@ class BinaryStateModel:
 
         estimate = minimize(
             fun=optim_func,
-            x0=np.array([0.001]),
+            x0=np.array([self.alpha]),
             args=(self,),
             method='L-BFGS-B',
             bounds=[(0, 50)],
         )
 
-        result = {">>>>>>>>>>>>>>>>"
-            "alpha": round(estimate.x, 6),
-            "Lik": round(estimate.fun, 6),            
-            "negLogLik": round(-np.log(-estimate.fun), 2),
+        result = {
+            "alpha": estimate.x[0],
+            "Lik": estimate.fun,            
+            "negLogLik": -np.log(-estimate.fun),
             "convergence": estimate.success,
             }
 
@@ -234,17 +247,16 @@ def optim_func(params, model):
 if __name__ == "__main__":
 
     from hogtie.utils import set_loglevel
-    set_loglevel("INFO")
+    set_loglevel("DEBUG")
     TREE = toytree.rtree.imbtree(ntips=10, treeheight=1000)
 
     DATA = np.array([1, 1, 0, 0, 1, 0, 0, 0, 0, 1])
-    mod = BinaryStateModel(TREE, DATA)
-    #print(mod.qmat)
+    mod = BinaryStateModel(TREE, DATA, 'ER')
     mod.optimize()
 
-    #DATA = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
-    #mod = BinaryStateModel(TREE, DATA, 'ARD')
-    #mod.optimize()
+    DATA = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+    mod = BinaryStateModel(TREE, DATA, 'ARD')
+    mod.optimize()
 
     #DATA = np.array([1, 1, 1, 1, 1, 1, 0, 0, 0, 0])
     #mod = BinaryStateModel(TREE, DATA, 'ER')
