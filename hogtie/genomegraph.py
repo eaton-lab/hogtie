@@ -1,5 +1,9 @@
 #! usr/bin/env python
 
+"""
+Creates linearized genome graph of likelihoods
+"""
+
 import toyplot
 import numpy as np
 import pandas as pd

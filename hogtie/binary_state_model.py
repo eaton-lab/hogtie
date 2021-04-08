@@ -19,10 +19,14 @@ class BinaryStateModel:
 
     alternative names: DiscreteMarkovModel
 
-    Describe that we use Pagel's model, explain how this differs from
-    what is implemented for discrete characters in ace().
+    The model is a discrete markov model implemented as described by Pagel (1994). This model
+    is similar to that used in ace (R package, add: link); however, hogtie assumes a uniform
+    prior at the root. Hogtie is designed to run across large-matrices corresponding to genetic
+    variants identified in sequence data (kmers, snps, transcripts, etc.) and allows for visualization
+    of inferred character states and likelihoods along a tree and genome of interest, respectively.
 
-    TODO: implement different models (ER, ARD, ...)
+    Either an equal rates (ER, transition rate parameters are equal) or all rates different (ARD, 
+    transition rate parameters are unequal) can be selected.
 
     Parameters
     ----------
@@ -31,10 +35,11 @@ class BinaryStateModel:
     data: ndarray
         array of integer binary data in order of node indices (0-ntips).
     model: str
-        Not yet implemented (fits all rates)
+         Either equal rates ('ER') or all rates different ('ARD')
     prior: float
         Prior probability that the root state is 1 (default=0.5). Flat, uniform prior is assumed.
     """
+
     def __init__(self, tree, data, model, prior=0.5):
       
         # store user inputs
@@ -55,6 +60,7 @@ class BinaryStateModel:
         # set likelihoods to 1 for data at tips, and None for internal
         self.set_initial_likelihoods()
 
+        #define qmat
         if self.model == 'ER':
             self.qmat = np.array([
                 [-self.alpha, self.alpha],
@@ -72,10 +78,10 @@ class BinaryStateModel:
 
     #@property
     # def qmat(self):
-        """
-        Instantaneous transition rate matrix (Q). This returns the 
-        matrix given the values currently set on .alpha and .beta.
-        """
+        #"""
+        #Instantaneous transition rate matrix (Q). This returns the 
+        #matrix given the values currently set on .alpha and .beta.
+        #"""
         #if self.model == 'ER':
         #qmat = np.array([
         #    [-self.alpha, self.alpha],
@@ -89,7 +95,6 @@ class BinaryStateModel:
         #       ])
 
         #return qmat
-        #self.qmat = qmat
 
     def set_initial_likelihoods(self):
         """
@@ -225,6 +230,15 @@ class BinaryStateModel:
         else:
             raise Exception('model must be specified as either ARD or ER')
 
+        # get scaled likelihood values
+        self.log_lik = result["negLogLik"]
+        self.tree = self.tree.set_node_values(
+            'likelihood',
+            values={
+                node.idx: np.array(node.likelihood) / sum(node.likelihood)
+                for node in self.tree.idx_dict.values()
+            }
+        )
 
     def draw_states(self):
         """

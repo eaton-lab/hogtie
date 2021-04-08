@@ -1,44 +1,58 @@
 #! usr/bin/env python
 
 """
-Runs Pagel on matrix derived from kmerkit
+Runs BinaryStateModel on matrix of binary character state data for gwas data for the input tree.
+The matrix should correspond to presence/absence data corresponding to sequence variants (this
+could be kmers, snps, transcripts, etc.).
+
+Parameters
+    ----------
+    tree: newick string or toytree object
+        species tree to be used for the GWAS
+    matrix: pandas.dataframe object, csv
+    model: str
+        Either equal rates ('ER') or all rates different ('ARD')
+    prior: float
+        Prior probability that the root state is 1 (default=0.5). Flat, uniform prior is assumed.
 """
 
-#I'll start by making this separately, but I think these can be functions
-#of my Pagel class object
 
 import numpy as np
+import toytree
 import pandas as pd #assuming matrix will be a pandas df
 from loguru import logger
 from hogtie.binary_state_model import BinaryStateModel
 
 
-#DATA = pd.read_csv(my_input_file)
-
 class MatrixParser:
     """
     Runs BinaryStateModel on matrix columns, returns a likelihood score for each column, flags
     likelihood scores that do not meet a certain threshold
+
     """
     def __init__(self, 
         tree,               #must be Toytree class object
         matrix = None,      #must be pandas DataFrame class object
-        file = None,
-        model = None    
+        model = None,
+        prior = 0.5    
         ):       #must be .csv filetype - as filepath
 
 
-        self.tree = tree
-        self.model = model 
+        if isinstance(tree, toytree.tree):
+            self.tree = tree
+        elif isinstance(tree, str):
+            self.tree = toytree.tree(tree, tree_format=0)
+        else: 
+            raise Exception('tree must be either a newick string or toytree object')
+
 
         if isinstance(matrix, pd.DataFrame):
             self.matrix = matrix  
-
-        elif file != None:
-            self.matrix = pd.read_csv(file)
-
         else:
-            raise ValueError("please supply matrix")
+            self.matrix = pd.read_csv(matrix)
+
+        self.model = model
+        self.prior = prior
 
         #for i in self.matrix:
         #  if i != 1 or 0:
@@ -51,7 +65,7 @@ class MatrixParser:
         likelihoods = np.empty((0,len(self.matrix.columns)),float)
         for column in self.matrix:
             data = self.matrix[column]
-            out = BinaryStateModel(self.tree, data, self.model)
+            out = BinaryStateModel(self.tree, data, self.model, self.prior)
             out.optimize()
         
             lik = out.log_lik
@@ -59,20 +73,15 @@ class MatrixParser:
          
             self.likelihoods = pd.DataFrame(likelihoods)
 
-    #logger.debug(f'Calculated likelihoods for each column: {self.tree.get_node_values('likelihood',True,True)}')
+        logger.debug(f'Likelihoods for each column: {self.tree.get_node_values("likelihood",True,True)}')
 
-    def threshold(self):
-        """
-        Pulls out likelihoods that do not meet a minimum likelihood threshold
-        """
-        pass
-
+    
 if __name__ == "__main__":
     import toytree
     import os
     HOGTIEDIR = os.path.dirname(os.getcwd())
     tree1 = toytree.rtree.unittree(ntips=10)
     file1 = os.path.join(HOGTIEDIR, "sampledata", "testmatrix.csv")
-    testmatrix = MatrixParser(tree=tree1, file=file1, model='ARD')
+    testmatrix = MatrixParser(tree=tree1, matrix=file1, model='ARD')
     testmatrix.matrix_likelihoods()
     print(testmatrix.likelihoods)
