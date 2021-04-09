@@ -1,5 +1,13 @@
 # HoGTIE (**Ho**rizontal **G**ene **T**ransfer **I**dentification **E**ngine)
-First thought to only occur widely in prokaryotic organisms, recent work has shown the prevalence of horizontal gene transfer (HGT) across the tree of life. HoGTIE uses a Discrete Markov Model to reconstruct ancestral character states of sequence motifs (*i.e.* kmers, SNPs, or transcripts) across a species tree, identifying sequence motifs that are likely a result of introgression and identifying regions that contain introgression along a linear genome. HoGTIE employs a flexible, comparative phylogenomic method that can be used in the absence of well-resolved genome assemblies.
+
+First thought to only occur widely in prokaryotic organisms, recent work has shown the prevalence of horizontal gene transfer (HGT) across the tree of life. Identifying regions that contain HGT, though, is difficult in eukaryotic organisms and particularly difficult in plants. HoGTIE uses a combination of k-mer-based and likelihood methods to identify genomic regions and sequences that contain HGT in a recipient species by:
+
+	1. Treating kmer presence/absence as a binary character
+	2. Modeling evolution via a discrete Markov Model, traversing backwards along an input tree to estimate ancestral character states
+	3. Identifying regions that deviate from expectations set by parameterizing a species tree model through simulation methods
+
+ The combination of these methodologies allows for comparison of potentially diverse genome structures and sizes in the absence of well-resolved reference genomes across the phylogeny of interest. HoGTIE visualizes regions of predicted HGT by flagging them along a linear genome. 
+
 
 ### In development
 HoGTIE is under active development. If you would like to check out or contribute to the code, hogtie can be installed locally via:
