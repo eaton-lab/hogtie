@@ -1,5 +1,5 @@
 # HoGTIE (**Ho**rizontal **G**ene **T**ransfer **I**dentification **E**ngine)
-First thought to only occur widely in prokaryotic organisms, recent work has shown the prevalence of horizontal gene transfer (HGT) across the tree of life. HoGTIE uses a Discrete Markov Model to reconstruct ancestral character states of sequence motifs (*i.e.* kmers, SNPs, or transcripts) across a species tree, identifying sequence motifs that are likely a result of introgression and mapping them along a genome-of-interest. HoGTIE employs a flexible, comparative GWAS method that can be used in the absence of well-resolved genome assemblies.
+First thought to only occur widely in prokaryotic organisms, recent work has shown the prevalence of horizontal gene transfer (HGT) across the tree of life. HoGTIE uses a Discrete Markov Model to reconstruct ancestral character states of sequence motifs (*i.e.* kmers, SNPs, or transcripts) across a species tree, identifying sequence motifs that are likely a result of introgression and identifying regions that contain introgression along a linear genome. HoGTIE employs a flexible, comparative phylogenomic method that can be used in the absence of well-resolved genome assemblies.
 
 ### In development
 HoGTIE is under active development. If you would like to check out or contribute to the code, hogtie can be installed locally via:
@@ -17,7 +17,10 @@ pip install -e .
 
 ```
 
-To test your installation, run:
+If interested in using HoGTIE on a CLI, test your installation by running:
 ```
-hogtie --data sampledata/testdata.csv --tree sampledata/testmatrix.txt
+hogtie --tree sampledata/testtree.txt --data sampledata/testmatrix.csv --model ARD
 ```
+HoGTIE will read in the testdata and write the results to a file in an output directory.
+
+To use HoGTIE on the API (currently includes visualization of likelihood scores and ancestral character states along a tree), open up the API [working example in the notebooks folder](notebooks/working_example).

@@ -22,7 +22,7 @@ class MatrixParser:
     Parameters
     ----------
     tree: newick string or toytree object
-        species tree to be used for the GWAS
+        species tree to be used. ntips = number of rows in data matrix
     matrix: pandas.dataframe object, csv
         matrix of 1's and 0's corresponding to presence/absence data of the sequence variant at the tips of 
         the input tree. Row number must equal tip number. 
@@ -82,7 +82,7 @@ class MatrixParser:
         significantly from null expectations
         """
         
-        self.likelihoods['rollingav']=self.likelihoods.rolling(50,win_type='triang').mean()
+        self.likelihoods['rollingav']=self.likelihoods.rolling(2,win_type='triang').mean()
         #data['z_score']=stats.zscore(data['rollingav'],nan_policy='omit')
 
         plot = toyplot.plot(

@@ -30,17 +30,17 @@ class BinaryStateModel:
 
     Parameters
     ----------
-    tree: species tree to be used for comparative GWAS
-        newick string or toytree object
+    tree: newick string or toytree object
+        species tree to be used. ntips = number of rows in data matrix
     data: ndarray
         array of integer binary data in order of node indices (0-ntips).
     model: str
-         Either equal rates ('ER') or all rates different ('ARD'). Default is 'ARD'.
+         Either equal rates ('ER') or all rates different ('ARD').
     prior: float
         Prior probability that the root state is 1 (default=0.5). Flat, uniform prior is assumed.
     """
 
-    def __init__(self, tree, data, model=None, prior=0.5):
+    def __init__(self, tree, data, model, prior=0.5):
       
         # store user inputs
         self.tree = tree
