@@ -74,6 +74,7 @@ class BinaryStateModel:
         #else:
         #   raise Exception("model must be specified as either 'ER' or 'ARD'")    
 
+    @property
     def qmat(self):
         """
         Instantaneous transition rate matrix (Q). This returns the 
