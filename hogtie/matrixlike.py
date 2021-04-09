@@ -2,18 +2,6 @@
 
 """
 Runs BinaryStateModel on matrix of binary character state data for gwas data for the input tree.
-The matrix should correspond to presence/absence data corresponding to sequence variants (this
-could be kmers, snps, transcripts, etc.).
-
-Parameters
-    ----------
-    tree: newick string or toytree object
-        species tree to be used for the GWAS
-    matrix: pandas.dataframe object, csv
-    model: str
-        Either equal rates ('ER') or all rates different ('ARD')
-    prior: float
-        Prior probability that the root state is 1 (default=0.5). Flat, uniform prior is assumed.
 """
 
 
@@ -26,8 +14,21 @@ from hogtie.binary_state_model import BinaryStateModel
 
 class MatrixParser:
     """
-    Runs BinaryStateModel on matrix columns, returns a likelihood score for each column, flags
-    likelihood scores that do not meet a certain threshold
+    Runs BinaryStateModel on matrix columns, returns a likelihood score for each column.
+    The matrix should correspond to presence/absence data corresponding to sequence variants (this
+    could be kmers, snps, transcripts, etc.).
+
+    Parameters
+    ----------
+    tree: newick string or toytree object
+        species tree to be used for the GWAS
+    matrix: pandas.dataframe object, csv
+        matrix of 1's and 0's corresponding to presence/absence data of the sequence variant at the tips of 
+        the input tree. Row number must equal tip number. 
+    model: str
+        Either equal rates ('ER') or all rates different ('ARD')
+    prior: float
+        Prior probability that the root state is 1 (default=0.5). Flat, uniform prior is assumed.
 
     """
     def __init__(self, 
@@ -35,8 +36,7 @@ class MatrixParser:
         matrix = None,      #must be pandas DataFrame class object
         model = None,
         prior = 0.5    
-        ):       #must be .csv filetype - as filepath
-
+        ):
 
         if isinstance(tree, toytree.tree):
             self.tree = tree
@@ -77,7 +77,6 @@ class MatrixParser:
 
     
 if __name__ == "__main__":
-    import toytree
     import os
     HOGTIEDIR = os.path.dirname(os.getcwd())
     tree1 = toytree.rtree.unittree(ntips=10)

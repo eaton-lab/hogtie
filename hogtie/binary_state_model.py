@@ -35,12 +35,12 @@ class BinaryStateModel:
     data: ndarray
         array of integer binary data in order of node indices (0-ntips).
     model: str
-         Either equal rates ('ER') or all rates different ('ARD')
+         Either equal rates ('ER') or all rates different ('ARD'). Default is 'ARD'.
     prior: float
         Prior probability that the root state is 1 (default=0.5). Flat, uniform prior is assumed.
     """
 
-    def __init__(self, tree, data, model, prior=0.5):
+    def __init__(self, tree, data, model=None, prior=0.5):
       
         # store user inputs
         self.tree = tree
@@ -60,41 +60,41 @@ class BinaryStateModel:
         # set likelihoods to 1 for data at tips, and None for internal
         self.set_initial_likelihoods()
 
-        #define qmat
-        if self.model == 'ER':
-            self.qmat = np.array([
-                [-self.alpha, self.alpha],
-                [self.alpha,  -self.alpha],
-                ])
-        
-        elif self.model == 'ARD':
-            self.qmat = np.array([
-                [-self.alpha, self.beta],
-                [self.alpha, -self.beta]
-                ])
-        else:
-            raise Exception("model must be specified as either 'ER' or 'ARD'")
-
-
-    #@property
-    # def qmat(self):
-        #"""
-        #Instantaneous transition rate matrix (Q). This returns the 
-        #matrix given the values currently set on .alpha and .beta.
-        #"""
         #if self.model == 'ER':
-        #qmat = np.array([
-        #    [-self.alpha, self.alpha],
-        #    [self.alpha,  -self.alpha],
-        #    ])
-
+        #    self.qmat = np.array([
+        #        [-self.alpha, self.alpha],
+        #        [self.alpha,  -self.alpha],
+        #        ])
+            
         #elif self.model == 'ARD':
-        #    qmat = np.array([
-        #       [-self.alpha, self.beta],
-        #        [-self.beta, self.alpha],    
-        #       ])
+        #    self.qmat = np.array([
+        #        [-self.alpha, self.alpha],
+        #        [self.beta, -self.beta]
+        #        ])
+        #else:
+        #   raise Exception("model must be specified as either 'ER' or 'ARD'")    
 
-        #return qmat
+    def qmat(self):
+        """
+        Instantaneous transition rate matrix (Q). This returns the 
+        matrix given the values currently set on .alpha and .beta.
+        """
+        #if self.model == 'ER':
+            #qmat = np.array([
+            #    [-self.alpha, self.alpha],
+            #    [self.alpha,  -self.alpha],
+            #    ])
+        
+        #elif self.model == 'ARD':
+        qmat = np.array([
+            [-self.alpha, self.alpha],
+            [self.beta, -self.beta]
+           ])
+        #else:
+        #   raise Exception("model must be specified as either 'ER' or 'ARD'")
+
+        return qmat
+
 
     def set_initial_likelihoods(self):
         """
@@ -127,9 +127,10 @@ class BinaryStateModel:
         # get the TreeNode 
         node = self.tree.idx_dict[nidx]
 
+        qmat = self.qmat()       
         # get transition probabilities over each branch length
-        prob_child0 = expm(self.qmat * node.children[0].dist)
-        prob_child1 = expm(self.qmat * node.children[1].dist)
+        prob_child0 = expm(qmat * node.children[0].dist)
+        prob_child1 = expm(qmat * node.children[1].dist)
 
         # likelihood that child 0 observation occurs if anc==0
         child0_is0 = (
@@ -189,46 +190,46 @@ class BinaryStateModel:
         logger.warning(message).
         """  
 
-        if self.model == 'ARD':
-            estimate = minimize(
-            fun=optim_func,
-            x0=np.array([self.alpha, self.beta]),
-            args=(self,),
-            method='L-BFGS-B',
-            bounds=((0, 50), (0, 50)),
-            )
+        #if self.model == 'ARD':
+        estimate = minimize(
+        fun=optim_func,
+        x0=np.array([self.alpha, self.beta]),
+        args=(self,),
+        method='L-BFGS-B',
+        bounds=((0, 50), (0, 50)),
+        )
+    # logger.info(estimate)
+
+    # organize into a dict
+        result = {
+            "alpha": round(estimate.x[0], 6),
+            "beta": round(estimate.x[1], 6), 
+            "Lik": round(estimate.fun, 6),            
+            "negLogLik": round(-np.log(-estimate.fun), 2),
+            "convergence": estimate.success,
+            }
+        logger.info(result)
+
+#        elif self.model == 'ER':
+#            estimate = minimize(
+#                fun=optim_func,
+#                x0=np.array([self.alpha]),
+#                args=(self,),
+#                method='L-BFGS-B',
+#                bounds=[(0, 50)],
+#            )
         # logger.info(estimate)
 
-        # organize into a dict
-            result = {
-                "alpha": round(estimate.x[0], 6),
-                "beta": round(estimate.x[1], 6), 
-                "Lik": round(estimate.fun, 6),            
-                "negLogLik": round(-np.log(-estimate.fun), 2),
-                "convergence": estimate.success,
-                }
-            logger.info(result)
+#            result = {
+#                "alpha": round(int(estimate.x)),
+#                "Lik": estimate.fun,            
+#                "negLogLik": -np.log(-estimate.fun),
+#                "convergence": estimate.success,
+#                }
+#            logger.info(result)
 
-        elif self.model == 'ER':
-            estimate = minimize(
-                fun=optim_func,
-                x0=np.array([self.alpha]),
-                args=(self,),
-                method='L-BFGS-B',
-                bounds=[(0, 50)],
-            )
-        # logger.info(estimate)
-
-            result = {
-                "rate": estimate.x,
-                "Lik": estimate.fun,            
-                "negLogLik": -np.log(-estimate.fun),
-                "convergence": estimate.success,
-                }
-            logger.info(result)
-
-        else:
-            raise Exception('model must be specified as either ARD or ER')
+#        else:
+#            raise Exception('model must be specified as either ARD or ER')
 
         # get scaled likelihood values
         self.log_lik = result["negLogLik"]
@@ -266,9 +267,14 @@ def optim_func(params, model):
     containing the parameters to be estimated (alpha, beta), and the
     BinaryStateModel class instance as the second argument.
     """
-    model.alpha = params
+    #if model.model == 'ARD':
+    model.alpha, model.beta = params
     lik = model.pruning_algorithm()
 
+   # else:
+   #    model.alpha = params
+   #     lik = model.pruning_algorithm()
+    
     return -lik
 
 
@@ -279,12 +285,12 @@ if __name__ == "__main__":
     TREE = toytree.rtree.imbtree(ntips=10, treeheight=1000)
 
     DATA = np.array([1, 1, 0, 0, 1, 0, 0, 0, 0, 1])
-    mod = BinaryStateModel(TREE, DATA, 'ER')
-    mod.optimize()
-
-    DATA = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
     mod = BinaryStateModel(TREE, DATA, 'ARD')
     mod.optimize()
+
+    #DATA = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
+    #od = BinaryStateModel(TREE, DATA, 'ARD')
+    #mod.optimize()
 
     #DATA = np.array([1, 1, 1, 1, 1, 1, 0, 0, 0, 0])
     #mod = BinaryStateModel(TREE, DATA, 'ER')

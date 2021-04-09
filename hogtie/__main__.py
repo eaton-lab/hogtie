@@ -6,9 +6,12 @@ Command line interface for hogtie
 
 import argparse
 import sys
+import os
+import subprocess
+import pandas as pd
 #import pandas as pd #eventually change this to convert matrix to df when I can parse matrix
 import toytree
-from hogtie import Pagel
+from hogtie import BinaryStateModel, MatrixParser, genomegraph
 
 
 
@@ -19,7 +22,7 @@ def parse_command_line():
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--data',
+    parser.add_argument('--matrix',
         nargs='?',
         type=argparse.FileType('r'),
         help='Input is binary character trait data in a csv file',
@@ -41,18 +44,18 @@ def main():
     """
     print('Reading in data and tree...')
     args = parse_command_line()
-    mydata = args.data.read()
-    mydata = mydata.split(',')
-    mydata = [int(i) for i in mydata] 
- 
+   
+    #mydata = args.matrix.read()
     mytree = args.tree.read()
-    mytree = toytree.tree(mytree, tree_format=0)
- 
-    print('Getting conditional likelihoods...')
-    liketree = Pagel(tree=mytree, data=mydata)
-    liketree.run()
-    print('The conditional likelihoods at each node are:')
-    print(liketree.tree.get_node_values('likelihood',True,True))
+   
+    print('Calculating likelihoods...')
+    liketree = MatrixParser(tree=mytree, matrix=args.matrix)
+    liketree.matrix_likelihoods()
 
+    HOGTIEDIR = os.path.dirname(os.getcwd())
+    subprocess.run(["mkdir", f"{HOGTIEDIR}/hogtie_output"], check=True)
+    subprocess.run(["touch", f"{HOGTIEDIR}/hogtie_output/results.csv"], check=True)
+
+    liketree.likelihoods.to_csv(path_or_buf=f"{HOGTIEDIR}/hogtie_output/results.csv", mode='b')
 
 #if __name__ == "__main__":
