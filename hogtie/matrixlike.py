@@ -7,6 +7,7 @@ Runs BinaryStateModel on matrix of binary character state data for gwas data for
 
 import numpy as np
 import toytree
+import toyplot
 import pandas as pd #assuming matrix will be a pandas df
 from loguru import logger
 from hogtie.binary_state_model import BinaryStateModel
@@ -75,6 +76,23 @@ class MatrixParser:
 
         logger.debug(f'Likelihoods for each column: {self.tree.get_node_values("likelihood",True,True)}')
 
+    def genome_graph(self):
+        """
+        Graphs rolling average of likelihoods along the linear genome, identifies regions that deviate
+        significantly from null expectations
+        """
+        
+        self.likelihoods['rollingav']=self.likelihoods.rolling(50,win_type='triang').mean()
+        #data['z_score']=stats.zscore(data['rollingav'],nan_policy='omit')
+
+        plot = toyplot.plot(
+            self.likelihoods['rollingav'],
+            width = 500,
+            height=500,
+            color = 'blue'
+        )
+
+        return plot
     
 if __name__ == "__main__":
     import os
