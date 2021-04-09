@@ -23,4 +23,4 @@ hogtie --tree sampledata/testtree.txt --data sampledata/testmatrix.csv --model A
 ```
 HoGTIE will read in the testdata and write the results to a file in an output directory.
 
-To use HoGTIE on the API (currently includes visualization of likelihood scores and ancestral character states along a tree), open up the API [working example in the notebooks folder](notebooks/working_example).
+To use HoGTIE on the API (currently includes visualization of likelihood scores and ancestral character states along a tree), open up the API [working example in the notebooks folder](https://github.com/cohen-r/hogtie/blob/main/notebooks/working_example.ipynb) in a jupyter notebook after pip installation.
