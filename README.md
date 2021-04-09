@@ -2,15 +2,15 @@
 
 First thought to only occur widely in prokaryotic organisms, recent work has shown the prevalence of horizontal gene transfer (HGT) across the tree of life. Identifying regions that contain HGT, though, is difficult in eukaryotic organisms and particularly difficult in plants. HoGTIE uses a combination of k-mer-based and likelihood methods to identify genomic regions and sequences that contain HGT in a recipient species by:
 
-1. Treating kmer presence/absence as a binary character
-2. Modeling evolution via a discrete Markov Model, traversing backwards along an input tree to estimate ancestral character states of kmer presence/absence
-3. Identifying kmers whose distribution along the tips of an input phylogeny deviate from expectations. Expectations are set by parameterizing a species tree model through simulations
+1. Treating k-mer presence/absence as a binary character
+2. Modeling evolution via a discrete Markov Model, traversing backwards along an input phylogeny to estimate ancestral character states of k-mer presence/absence
+3. Identifying k-mers whose distribution along the tips the input phylogeny deviate from expectations. Expectations are set by parameterizing a species tree model through simulations
 
- The combination of these methodologies allows for comparison of potentially diverse genome structures and sizes in the absence of well-resolved reference genomes across the phylogeny of interest. HoGTIE visualizes regions of predicted HGT by flagging presence/absence patterns that deviate significantly from expectations along a graph of the linearized recipient genome. 
+ The combination of these methodologies allows for comparison of potentially diverse genome structures and sizes in the absence of well-resolved reference genomes across the input phylogeny. HoGTIE visualizes regions of predicted HGT by flagging presence/absence patterns that deviate significantly from expectations along a graph of the linearized recipient genome. 
 
 
 ### In development
-HoGTIE is under active development. If you would like to check out or contribute to the code, hogtie can be installed locally via:
+HoGTIE is under active development. If you would like to check out or contribute to the code, HoGTIE can be installed locally via:
 
 ```
 # coming soon...
