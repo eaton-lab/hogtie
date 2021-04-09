@@ -16,7 +16,7 @@ HoGTIE is under active development. If you would like to check out or contribute
 # coming soon...
 # conda install hogtie -c conda-forge -c bioconda
 
-# for now, install dependencies (toytree, numpy, pandas, scipy, sys, argparse, os, loguru) and
+# for now, install dependencies (toytree, ipcoal, numpy, pandas, scipy, sys, argparse, os, loguru) and
 # do dev installation with pip
 
 git clone https://github.com/cohen-r/hogtie
