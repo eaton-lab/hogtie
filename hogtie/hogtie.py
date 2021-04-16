@@ -13,6 +13,10 @@ from hogtie import MatrixParser
 class Hogtie:
     """
     Compare data to expectations
+
+    TO DO: Not sure standard deviation-based comparison is the best for
+    log-likelihoods from a statistical point of view. Maybe something more like
+    an AIC-type comparison?
     """
     def __init__(self, tree, matrix, model=None, prior=0.5):
         self.tree = tree
@@ -59,6 +63,7 @@ class Hogtie:
 
         lik_calc.matrix_likelihoods()
         
+        #deviations returns a list with just 1 number
         deviations = []
         for like in lik_calc.likelihoods:
             if (like < high_lik).bool:
@@ -70,22 +75,23 @@ class Hogtie:
 
     def genome_graph(self):
         """
-        Graphs rolling average of likelihoods along the linear genome, identifies regions that deviate
-        significantly from null expectations
+        Graphs rolling average of likelihoods along the linear genome, identifies 
+        regions that deviate significantly from null expectations
 
-        TO DO: change color of outliers 
+        TO DO: change color of outliers, integrate into Hogtie class instead of MatrixParser
+        class
         """
 
-        self.likelihoods['rollingav']= self.likelihoods.rolling(10, win_type='triang').mean()
+        #self.likelihoods['rollingav']= self.likelihoods.rolling(10, win_type='triang').mean()
         
-        plot = toyplot.plot(
-            self.likelihoods['rollingav'],
-            width = 500,
-            height=500,
-            color = 'blue'
-        )
+        #plot = toyplot.plot(
+        #    self.likelihoods['rollingav'],
+        #    width = 500,
+        #    height=500,
+        #    color = 'blue'
+        #)
 
-        return plot
+        #return plot
 
 if __name__ == "__main__":
     testtree = toytree.rtree.unittree(ntips=10)
