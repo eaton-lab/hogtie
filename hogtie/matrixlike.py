@@ -85,19 +85,18 @@ class MatrixParser:
                 if list(self.matrix[col]) == list(self.unique_matrix[column]):
                     likelihoods = np.append(likelihoods, lik)
 
-            self.likelihoods = pd.DataFrame(likelihoods)
-
+        self.likelihoods = pd.DataFrame(likelihoods)
         logger.debug(f'Likelihoods for each column: {self.tree.get_node_values("likelihood",True,True)}')
+
 
     def genome_graph(self):
         """
         Graphs rolling average of likelihoods along the linear genome, identifies regions that deviate
         significantly from null expectations
         """
-        
-        self.likelihoods['rollingav']=self.likelihoods.rolling(10,win_type='triang').mean()
-        #data['z_score']=stats.zscore(data['rollingav'],nan_policy='omit')
 
+        self.likelihoods['rollingav']= self.likelihoods.rolling(10, win_type='triang').mean()
+        
         plot = toyplot.plot(
             self.likelihoods['rollingav'],
             width = 500,
