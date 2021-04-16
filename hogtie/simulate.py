@@ -7,6 +7,7 @@ generating data using ipcoal
 import ipcoal
 import toytree
 import pandas as pd
+import numpy as np
 from scipy.stats import zscore
 from hogtie import MatrixParser
 
@@ -64,14 +65,14 @@ class Hogtie:
         lik_calc.matrix_likelihoods()
         
         #deviations returns a list with just 1 number
-        deviations = []
+        devs = [] #would prefer to append to an empty np.array
         for like in lik_calc.likelihoods:
-            if (like < high_lik).bool:
-                deviations.append(0)
+            if like >= high_lik:
+                devs.append(1)
             else:
-                deviations.append(1)
+                devs.append(0)
 
-        self.deviations = deviations
+        self.deviations = np.array(devs)
 
     def genome_graph(self):
         """

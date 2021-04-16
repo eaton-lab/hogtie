@@ -85,7 +85,10 @@ class MatrixParser:
                 if list(self.matrix[col]) == list(self.unique_matrix[column]):
                     likelihoods = np.append(likelihoods, lik)
 
-        self.likelihoods = pd.DataFrame(likelihoods)
+        #self.likelihoods = pd.DataFrame(likelihoods)
+
+        #testing something in simulate
+        self.likelihoods = likelihoods
         logger.debug(f'Likelihoods for each column: {self.tree.get_node_values("likelihood",True,True)}')
 
 
@@ -96,7 +99,7 @@ class MatrixParser:
         """
 
         self.likelihoods['rollingav']= self.likelihoods.rolling(10, win_type='triang').mean()
-        
+
         plot = toyplot.plot(
             self.likelihoods['rollingav'],
             width = 500,
