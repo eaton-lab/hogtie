@@ -42,7 +42,7 @@ class Pagel:
         """
         Assigns likelihood values to tree tips based on data. 
         """
-        values = [{0:1-i,1:i} for i in self.data]
+        values = [{0:-(i-1),1:i} for i in self.data]
         keys = list(range(0, len(self.data), 1))
         valuesdict = dict(zip(keys,values))
         self.tree = self.tree.set_node_values(feature = "likelihood", values = valuesdict)
