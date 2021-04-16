@@ -14,12 +14,11 @@ def create_null(tree):
     Deviation from the null will be flagged. 
     """
     
-    #simulate snps across the input tree
-    #note: snp sims take a lot of computational power
-
-    mod = ipcoal.Model(tree=tree, Ne=1e6)
-    mod.sim_snps(nsnps=10000)
-    null_genos = mod.write_vcf()
+    #high ILS
+    mod = ipcoal.Model(tree=tree, Ne=(tree.treeheight + 1e3))
+    mod.sim_loci(nloci=1, nsites=1000)
+    vcf = mod.write_vcf()
+    null_genos = vcf.iloc[:, 9:].T
 
     #run the Binary State model on the matrix and get likelihoods
     null = MatrixParser(tree=tree, matrix=null_genos, model='ARD')

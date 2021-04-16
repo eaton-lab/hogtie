@@ -59,19 +59,32 @@ class MatrixParser:
         #  if i != 1 or 0:
         #        raise ValueError('Only valid trait values are 0 and 1')
 
+    @property
+    def unique_matrix(self):
+        """
+        Gets matrix that contains only columns with unique pattern of 1's and 0's
+        """
+        matrix_array = self.matrix.to_numpy()
+        unique_array = np.unique(matrix_array, axis=1)
+        unique_matrix = pd.DataFrame(unique_array)
+        return unique_matrix
+
     def matrix_likelihoods(self):
         """
         Gets likelihoods for each column of the matrix
         """
         likelihoods = np.empty((0,len(self.matrix.columns)),float)
-        for column in self.matrix:
-            data = self.matrix[column]
+        for column in self.unique_matrix:
+            data = self.unique_matrix[column]
             out = BinaryStateModel(self.tree, data, self.model, self.prior)
             out.optimize()
         
             lik = out.log_lik
-            likelihoods = np.append(likelihoods, lik)
-         
+
+            for col in self.matrix:
+                if list(self.matrix[col]) == list(self.unique_matrix[column]):
+                    likelihoods = np.append(likelihoods, lik)
+
             self.likelihoods = pd.DataFrame(likelihoods)
 
         logger.debug(f'Likelihoods for each column: {self.tree.get_node_values("likelihood",True,True)}')
@@ -82,7 +95,7 @@ class MatrixParser:
         significantly from null expectations
         """
         
-        self.likelihoods['rollingav']=self.likelihoods.rolling(2,win_type='triang').mean()
+        self.likelihoods['rollingav']=self.likelihoods.rolling(10,win_type='triang').mean()
         #data['z_score']=stats.zscore(data['rollingav'],nan_policy='omit')
 
         plot = toyplot.plot(

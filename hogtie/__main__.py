@@ -14,7 +14,7 @@ from hogtie import BinaryStateModel, MatrixParser, genomegraph
 
 def parse_command_line():
     """
-    Parses the args for the Pagel class
+    Parses the args CLI inputs
     """
 
     parser = argparse.ArgumentParser('Welcome to hogtie!')
@@ -51,9 +51,9 @@ def main():
     """
     Runs Pagel on parsed args
     """
-    print('Reading in data and tree...')
     args = parse_command_line()
    
+    print('Reading in data and tree...')
     #mydata = args.matrix.read()
     mytree = args.tree.read()
    
