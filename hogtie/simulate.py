@@ -1,7 +1,7 @@
 #! usr/bin/env python
 
 """
-generating data using ipcoal
+generating null data and testing observations against it
 """
 
 import ipcoal
@@ -11,7 +11,7 @@ import numpy as np
 from scipy.stats import zscore
 from hogtie import MatrixParser
 
-class Hogtie:
+class SimulateNull:
     """
     Compare data to expectations
 
@@ -52,7 +52,7 @@ class Hogtie:
     def significance_test(self):
         """
         identifies k-mer likelihoods that are +2 standard deviations outside of the mean
-        from simulated likelihood z-score
+        from simulated likelihood mean
         """
         #get the likelihood value that corresponds to the z-score of 3 in simulations
         high_lik = self.mu + 2*self.sigma
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     genos1 = mod1.write_vcf()
     data=genos1.iloc[:, 9:].T
     print(data)
-    test = Hogtie(tree=testtree, model='ARD', matrix=data)
+    test = SimulateNull(tree=testtree, model='ARD', matrix=data)
     test.create_null()
     test.cutoff()
     print(test.deviations)
