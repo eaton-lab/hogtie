@@ -91,23 +91,6 @@ class MatrixParser:
         self.likelihoods = likelihoods
         logger.debug(f'Likelihoods for each column: {self.tree.get_node_values("likelihood",True,True)}')
 
-
-    def genome_graph(self):
-        """
-        Graphs rolling average of likelihoods along the linear genome, identifies regions that deviate
-        significantly from null expectations
-        """
-
-        self.likelihoods['rollingav']= self.likelihoods.rolling(10, win_type='triang').mean()
-
-        plot = toyplot.plot(
-            self.likelihoods['rollingav'],
-            width = 500,
-            height=500,
-            color = 'blue'
-        )
-
-        return plot
     
 if __name__ == "__main__":
     import os

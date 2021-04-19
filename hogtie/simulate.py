@@ -17,7 +17,7 @@ class Hogtie:
 
     TO DO: Not sure standard deviation-based comparison is the best for
     log-likelihoods from a statistical point of view. Maybe something more like
-    an AIC-type comparison?
+    an AIC-type comparison or a likelihood-ratio test?
     """
     def __init__(self, tree, matrix, model=None, prior=0.5):
         self.tree = tree
@@ -49,9 +49,10 @@ class Hogtie:
         self.mu = mu
 
 
-    def cutoff(self):
+    def significance_test(self):
         """
-        identifies k-mer likelihoods that are +/-3 outside of zero from simulated likelihood z-score
+        identifies k-mer likelihoods that are +2 standard deviations outside of the mean
+        from simulated likelihood z-score
         """
         #get the likelihood value that corresponds to the z-score of 3 in simulations
         high_lik = self.mu + 2*self.sigma
@@ -64,7 +65,8 @@ class Hogtie:
 
         lik_calc.matrix_likelihoods()
         
-        #deviations returns a list with just 1 number
+        #I don't think we should expect much deviation among log-likelihoods
+        #a better signficance test is probably a likelihood-ratio test
         devs = [] #would prefer to append to an empty np.array
         for like in lik_calc.likelihoods:
             if like >= high_lik:
@@ -72,7 +74,7 @@ class Hogtie:
             else:
                 devs.append(0)
 
-        self.deviations = np.array(devs)
+        self.deviations = devs
 
     def genome_graph(self):
         """
@@ -98,8 +100,9 @@ if __name__ == "__main__":
     testtree = toytree.rtree.unittree(ntips=10)
     mod1 = ipcoal.Model(tree=testtree, Ne=1e3, admixture_edges=[(3, 8, 0.5, 0.5)], nsamples=1)
     mod1.sim_loci(nloci=1, nsites=100000)
-    genos = mod1.write_vcf()
-    data=genos.iloc[:, 9:].T
+    genos1 = mod1.write_vcf()
+    data=genos1.iloc[:, 9:].T
+    print(data)
     test = Hogtie(tree=testtree, model='ARD', matrix=data)
     test.create_null()
     test.cutoff()
