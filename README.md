@@ -1,6 +1,6 @@
-# HoGTIE (**Ho**rizontal **G**ene **T**ransfer **I**dentification **E**ngine)
+# HoGTIE (Horizontal Gene Transfer Identification Engine)
 
-First thought to only occur widely in prokaryotic organisms, recent work has shown the prevalence of horizontal gene transfer (HGT) across the tree of life. Identifying regions that contain HGT, though, is difficult in eukaryotic organisms and particularly difficult in plants. HoGTIE uses a combination of k-mer-based and likelihood methods to identify genomic regions and sequences that contain HGT in a recipient species by:
+First thought to only occur widely in prokaryotic organisms, recent work has shown the prevalence of horizontal gene transfer (HGT) across the tree of life. Identifying regions that contain HGT, though, is difficult in eukaryotic organisms and particularly difficult in plants due to lack of high quality reference genomes and highly variable genomic structure. HoGTIE uses a combination of k-mer-based and likelihood methods to identify genomic regions and sequences that contain HGT in a recipient species by:
 
 1. Treating k-mer presence/absence as a binary character
 2. Modeling evolution via a discrete Markov Model, traversing backwards along an input phylogeny to estimate ancestral character states of k-mer presence/absence
@@ -25,10 +25,10 @@ pip install -e .
 
 ```
 
-If interested in using HoGTIE on a CLI, test your installation by running:
+If interested in using HoGTIE on a CLI, test your installation by running the command below. The test matrix data is simulated SNP data. HoGTIE will read in the testdata and write the results to a file in an output directory.
+
 ```
 hogtie --tree sampledata/testtree.txt --data sampledata/testmatrix.csv --model ARD
 ```
-HoGTIE will read in the testdata and write the results to a file in an output directory.
 
-To use HoGTIE on the API (currently includes visualization of likelihood scores and ancestral character states along a tree), open up the API [working example in the notebooks folder](https://github.com/cohen-r/hogtie/blob/main/notebooks/working_example.ipynb) in a jupyter notebook after pip installation.
+HoGTIE will also run on the API for visualization of likelihood scores and ancestral character states along a tree. These capabilities are currently in development and being tested in the [working example in the notebooks folder](https://github.com/cohen-r/hogtie/blob/main/notebooks/working_example.ipynb), which can be accessed in a jupyter notebook after pip installation.
