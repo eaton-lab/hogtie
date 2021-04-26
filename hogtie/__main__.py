@@ -8,7 +8,7 @@ import argparse
 import sys
 import os
 import pandas as pd
-from hogtie import BinaryStateModel, MatrixParser, genomegraph
+from hogtie import BinaryStateModel, MatrixParser
 
 
 
