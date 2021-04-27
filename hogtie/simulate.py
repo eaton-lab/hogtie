@@ -89,11 +89,11 @@ class SimulateNull():
 
         self.likes['rollingav']= self.likes[0].rolling(50, win_type='triang').mean()
         
-        plot = toyplot.plot(
+        plot = toyplot.scatterplot(
             self.likes['rollingav'],
             width = 500,
             height=500,
-            color = (self.likes[1]) 
+            color = self.likes[1] 
         )
 
         return plot
