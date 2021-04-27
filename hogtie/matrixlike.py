@@ -64,7 +64,7 @@ class MatrixParser:
         """
         Gets matrix that contains only columns with unique pattern of 1's and 0's
         """
-        matrix_array = self.matrix.to_numpy(index_col=0)
+        matrix_array = self.matrix.to_numpy()
         unique_array = np.unique(matrix_array, axis=1)
         unique_matrix = pd.DataFrame(unique_array)
         return unique_matrix
