@@ -50,7 +50,7 @@ class MatrixParser:
         if isinstance(matrix, pd.DataFrame):
             self.matrix = matrix  
         else:
-            self.matrix = pd.read_csv(matrix)
+            self.matrix = pd.read_csv(matrix, index_col=0)
 
         self.model = model
         self.prior = prior
@@ -64,7 +64,7 @@ class MatrixParser:
         """
         Gets matrix that contains only columns with unique pattern of 1's and 0's
         """
-        matrix_array = self.matrix.to_numpy()
+        matrix_array = self.matrix.to_numpy(index_col=0)
         unique_array = np.unique(matrix_array, axis=1)
         unique_matrix = pd.DataFrame(unique_array)
         return unique_matrix
