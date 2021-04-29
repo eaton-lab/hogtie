@@ -57,7 +57,7 @@ class SimulateNull():
         null_mean = null.likelihoods[0].mean()
         
         #get the likelihood value that corresponds 2 standard deviations above the null mean
-        high_lik = null_mean + 2 * null_std
+        self.high_lik = null_mean + 2 * null_std
 
         lik_calc = MatrixParser(tree=self.tree,
                                model=self.model,
@@ -69,7 +69,7 @@ class SimulateNull():
 
         devs = [] #would prefer to append to an empty np.array
         for like in list(lik_calc.likelihoods[0]):
-            if like >= high_lik:
+            if like >= self.high_lik:
                 devs.append(1)
             else:
                 devs.append(0)
@@ -89,17 +89,14 @@ class SimulateNull():
 
         self.likes['rollingav']= self.likes[0].rolling(50, win_type='triang').mean()
         
-        colormap = toyplot.color.brewer.map("Dark2")
-        plot = toyplot.plot(
+        a,b,c = toyplot.plot(
             self.likes['rollingav'],
             width = 500,
             height=500,
-            color = colormap,
-            mfill = self.likes[1],
-            marker = 'o'
+            color = 'blue',
         )
 
-        return plot
+        b.hlines(self.high_lik, style={"stroke": "red", "stroke-width": 2});
 
 if __name__ == "__main__":
     testtree = toytree.rtree.unittree(ntips=10, treeheight=1e5)
