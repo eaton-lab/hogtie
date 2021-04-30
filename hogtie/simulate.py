@@ -40,8 +40,8 @@ class SimulateNull():
         """
         
         #high ILS
-        mod = ipcoal.Model(tree=self.tree, Ne=(self.treeheight + 1e3))
-        mod.sim_snps(nsnps=10)
+        mod = ipcoal.Model(tree=self.tree, Ne=(self.treeheight ** 3))
+        mod.sim_loci(nloci=1, nsites=10000)
         null_genos = mod.write_vcf().iloc[:, 9:].T
 
         #make sure matrix has only 0's and 1's
