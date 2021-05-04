@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 """
-Implements binary state markov model for ancestral character state reconstruction
+Implements binary state markov model for ancestral character state 
+reconstruction.
 """
 
 import numpy as np
@@ -39,7 +40,6 @@ class BinaryStateModel:
     prior: float
         Prior probability that the root state is 1 (default=0.5). Flat, uniform prior is assumed.
     """
-
     def __init__(self, tree, data, model, prior=0.5):
       
         # store user inputs
@@ -50,6 +50,7 @@ class BinaryStateModel:
 
         # model parameters to be estimated (in ER model only alpha)
         # set to initial values based on the tree height units.
+        self.qmat = None
         self.alpha = 1 / tree.treenode.height
         self.beta = 1 / tree.treenode.height
         self.log_lik = 0.
@@ -58,30 +59,28 @@ class BinaryStateModel:
             raise Exception('Matrix row number must equal ntips on tree')
 
         # set likelihoods to 1 for data at tips, and None for internal
+        self.set_qmat()
         self.set_initial_likelihoods()
 
 
-    @property
-    def qmat(self):
+    def set_qmat(self):
         """
         Instantaneous transition rate matrix (Q). This returns the 
         matrix given the values currently set on .alpha and .beta.
         """
         if self.model == 'ER':
-            qmat = np.array([
+            self.qmat = np.array([
                 [-self.alpha, self.alpha],
                 [self.alpha,  -self.alpha],
                 ])
         
         elif self.model == 'ARD':
-            qmat = np.array([
+            self.qmat = np.array([
                 [-self.alpha, self.alpha],
                 [self.beta, -self.beta]
                ])
         else:
            raise Exception("model must be specified as either 'ER' or 'ARD'")
-
-        return qmat
 
 
     def set_initial_likelihoods(self):
@@ -107,14 +106,11 @@ class BinaryStateModel:
         logger.debug(f"set tips values: {valuesdict}")
 
 
-    def node_conditional_likelihood(self, nidx):
+    def node_conditional_likelihood(self, node):
         """
         Returns the conditional likelihood at a single node given the
         likelihood's of data at its child nodes.
         """
-        # get the TreeNode 
-        node = self.tree.idx_dict[nidx]
-
         # get transition probabilities over each branch length
         prob_child0 = expm(self.qmat * node.children[0].dist)
         prob_child1 = expm(self.qmat * node.children[1].dist)
@@ -143,8 +139,8 @@ class BinaryStateModel:
         anc_lik_1 = child0_is1 * child1_is1
 
         # set estimated conditional likelihood on this node
-        logger.debug(f"node={nidx}; likelihood=[{anc_lik_0:.6f}, {anc_lik_1:.6f}]")
         node.likelihood = [anc_lik_0, anc_lik_1]
+
 
     def pruning_algorithm(self):
         """
@@ -153,9 +149,12 @@ class BinaryStateModel:
         conditional likelihood at root based on priors for root state.
         """
         # traverse tree to get conditional likelihood estimate at root.
+        self.set_qmat()
         for node in self.tree.treenode.traverse("postorder"):
-            if not node.is_leaf():
-                self.node_conditional_likelihood(node.idx)
+            if not node.is_leaf():               
+                self.node_conditional_likelihood(node)
+                logger.debug(
+                    f"node={node.idx}; likelihood=[{node.likelihood[0]:.6f}, {node.likelihood[1]:.6f}]")                
 
         # multiply root prior times the conditional likelihood at root
         root = self.tree.treenode
@@ -176,26 +175,25 @@ class BinaryStateModel:
         estimated parameters is at the max bound we should report a 
         logger.warning(message).
         """  
-
         if self.model == 'ARD':
             estimate = minimize(
-            fun=optim_func,
-            x0=np.array([self.alpha, self.beta]),
-            args=(self,),
-            method='L-BFGS-B',
-            bounds=((0, 50), (0, 50)),
+                fun=optim_func,
+                x0=np.array([self.alpha, self.beta]),
+                args=(self,),
+                method='L-BFGS-B',
+                bounds=((0, 50), (0, 50)),
             )
-        # logger.info(estimate)
+            # logger.info(estimate)
 
-        # organize into a dict
+            # organize into a dict
             result = {
-                "alpha": round(estimate.x[0], 6),
-                "beta": round(estimate.x[1], 6), 
-                "Lik": round(estimate.fun, 6),            
-                "negLogLik": round(-np.log(-estimate.fun), 2),
+                "alpha": estimate.x[0],
+                "beta": estimate.x[1],
+                "Lik": estimate.fun,
+                "negLogLik": -np.log(-estimate.fun),
                 "convergence": estimate.success,
                 }
-            logger.info(result)
+            logger.debug(result)
 
         elif self.model == 'ER':
             estimate = minimize(
@@ -212,7 +210,7 @@ class BinaryStateModel:
                 "negLogLik": -np.log(-estimate.fun),
                 "convergence": estimate.success,
                 }
-            logger.info(result)
+            logger.debug(result)
 
         else:
             raise Exception('model must be specified as either ARD or ER')
@@ -226,6 +224,7 @@ class BinaryStateModel:
                 for node in self.tree.idx_dict.values()
             }
         )
+
 
     def draw_states(self):
         """
@@ -266,13 +265,17 @@ def optim_func(params, model):
 
 if __name__ == "__main__":
 
+    import time
     from hogtie.utils import set_loglevel
-    set_loglevel("DEBUG")
+    set_loglevel("INFO")
     TREE = toytree.rtree.imbtree(ntips=10, treeheight=1000)
 
     DATA = np.array([1, 1, 0, 0, 1, 0, 0, 0, 0, 1])
+
+    start = time.time()
     mod = BinaryStateModel(TREE, DATA, 'ER')
     mod.optimize()
+    print(f"\n---- TIME: {time.time() - start:.5f} seconds")
 
     #DATA = np.array([1, 0, 1, 0, 1, 0, 1, 0, 1, 0])
     #od = BinaryStateModel(TREE, DATA, 'ARD')
