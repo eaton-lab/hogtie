@@ -38,6 +38,7 @@ def set_loglevel(loglevel="INFO"):
         "format": LOGFORMAT,
         "level": loglevel,
         "colorize": TTY1 or TTY2,
+        "enqueue": True,
     }]
     logger.configure(**config)
     logger.enable("hogtie")
