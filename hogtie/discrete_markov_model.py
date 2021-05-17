@@ -39,7 +39,7 @@ class DiscreteMarkovModel:
 
         # set likelihoods to 1 for data at tips, and None for internal
         self.unique = None
-        self.counts = None
+        self.inverse = None
         self.get_unique_data()
         self.set_node_arrays_to_tree()
         self.set_qmat()
